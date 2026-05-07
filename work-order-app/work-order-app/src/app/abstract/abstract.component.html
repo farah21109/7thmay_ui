@@ -1,0 +1,177 @@
+<!-- Top Navbar -->
+<div class="top-navbar">
+  <div class="navbar-left">
+    <span class="navbar-logo">&#127963;</span>
+    <span class="navbar-title">Work Order Management System</span>
+  </div>
+</div>
+
+<div class="abstract-page">
+
+  <!-- Page Header -->
+  <div class="abstract-header">
+    <button class="btn-back" (click)="goBack()">&#8592; Back</button>
+    <div class="header-titles">
+      <h1>Estimate Sheet — Abstract</h1>
+      <h2>{{ nameOfWork }}</h2>
+      <div class="header-meta" *ngIf="division || circle || ward">
+        <span *ngIf="division">Division: {{ division }}</span>
+        <span *ngIf="circle">Circle: {{ circle }}</span>
+        <span *ngIf="ward">Ward: {{ ward }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- View-only notice for Manager after submission -->
+  <div class="readonly-notice" *ngIf="viewOnly && !canEditAbstract">
+    &#128274; This work has been submitted. You are in view-only mode.
+  </div>
+
+  <div class="abstract-container">
+
+    <!-- ═══ PART 1: MATERIAL + CIVIL WORKS ═══ -->
+    <div class="abstract-section">
+      <div class="section-title">Part 1 — Item Summary</div>
+      <table class="abstract-table">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th>Description</th>
+            <th class="right-align">Amount (&#8377;)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="center">1</td>
+            <td>
+              <strong>Material Items</strong>
+              <div class="sub-items" *ngIf="materialItems.length > 0">
+                <div *ngFor="let item of materialItems; let i = index" class="sub-item-row">
+                  <span class="sub-num">{{ i + 1 }}.</span>
+                  <span class="sub-desc">{{ item.description }}</span>
+                  <span class="sub-amt">&#8377;{{ item.amount | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <div *ngIf="materialItems.length === 0" class="no-items">No material items</div>
+            </td>
+            <td class="right-align amount-cell">
+              <input type="number" [value]="materialTotal" class="readonly-input" readonly />
+            </td>
+          </tr>
+          <tr>
+            <td class="center">2</td>
+            <td>
+              <strong>Civil Works (Non-Material)</strong>
+              <div class="sub-items" *ngIf="civilWorksItems.length > 0">
+                <div *ngFor="let item of civilWorksItems; let i = index" class="sub-item-row">
+                  <span class="sub-num">{{ i + 1 }}.</span>
+                  <span class="sub-desc">{{ item.description }}</span>
+                  <span class="sub-amt">&#8377;{{ item.amount | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <div *ngIf="civilWorksItems.length === 0" class="no-items">No civil works items</div>
+            </td>
+            <td class="right-align amount-cell">
+              <input type="number" [value]="civilWorksTotal" class="readonly-input" readonly />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ PART 2: GST ═══ -->
+    <div class="abstract-section">
+      <div class="section-title">Part 2 — GST</div>
+      <table class="abstract-table">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th>Description</th>
+            <th class="right-align">Amount (&#8377;)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="center">3</td>
+            <td>GST &#64; {{ gstRate }}%</td>
+            <td class="right-align amount-cell">
+              <input type="number" [value]="gstAmount" class="readonly-input" readonly />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ PART 3: LS ═══ -->
+    <div class="abstract-section">
+      <div class="section-title">Part 3 — LS (Lump Sum)</div>
+      <table class="abstract-table">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th>Description</th>
+            <th class="right-align">Amount (&#8377;)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="center">4</td>
+            <td>LS Amount <span class="editable-hint">(editable)</span></td>
+            <td class="right-align amount-cell">
+              <input
+                type="number"
+                [(ngModel)]="lsAmount"
+                (ngModelChange)="onLsChange()"
+                name="lsAmount"
+                class="editable-input"
+                placeholder="0.00"
+                min="0"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══ GRAND TOTAL ═══ -->
+    <div class="grand-total-section">
+      <div class="grand-total-header">Grand Total</div>
+      <div class="grand-total-row">
+        <span class="grand-label">Total Amount</span>
+        <span class="grand-value">&#8377; {{ grandTotal | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- ═══ EDITED BY ═══ -->
+    <div class="edited-by-row">
+      <label class="edited-by-label">Edited By</label>
+      <select [(ngModel)]="editedBy" name="editedBy" class="edited-by-select">
+        <option value="">-- Select Person --</option>
+        <option value="Person 1">Person 1</option>
+        <option value="Person 2">Person 2</option>
+        <option value="Person 3">Person 3</option>
+        <option value="Person 4">Person 4</option>
+        <option value="Person 5">Person 5</option>
+        <option value="Person 6">Person 6</option>
+      </select>
+    </div>
+
+    <!-- ═══ SAVE BUTTON (hidden in view-only mode) ═══ -->
+    <div class="save-row" *ngIf="!viewOnly">
+      <button class="btn-save" (click)="onSave()" [disabled]="isSaving">
+        <span *ngIf="!isSaving">&#128190; Save to Database</span>
+        <span *ngIf="isSaving">Saving...</span>
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert-success" *ngIf="saveSuccess && !viewOnly">
+      &#10003; Saved successfully to database!
+    </div>
+    <div class="alert-error" *ngIf="saveError">
+      &#10007; {{ saveError }}
+    </div>
+
+
+  </div>
+</div>

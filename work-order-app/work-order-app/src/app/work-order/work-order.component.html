@@ -1,0 +1,359 @@
+<!-- Top Navbar -->
+<div class="top-navbar">
+  <div class="navbar-left">
+    <span class="navbar-logo">&#127963;</span>
+    <span class="navbar-title">Work Order Management System</span>
+  </div>
+  <div class="navbar-right">
+    <div class="navbar-user-info">
+      <span class="navbar-user">&#128100; {{ loggedInUser }}</span>
+      <span class="navbar-designation">{{ userDesignation }}</span>
+    </div>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="work-order-container">
+
+  <!-- Name of Work -->
+  <div class="name-of-work-row">
+    <label class="required-label">* Name Of Work</label>
+    <input type="text" class="name-of-work-input" placeholder="Name Of Work"
+      [(ngModel)]="nameOfWork" name="nameOfWork" />
+  </div>
+
+  <!-- User Info Panel -->
+  <div class="user-info-panel">
+    <div class="user-info-field">
+      <span class="user-info-label">Name</span>
+      <span class="user-info-value">{{ loggedInUser }}</span>
+    </div>
+    <div class="user-info-field">
+      <span class="user-info-label">Designation</span>
+      <span class="user-info-value">{{ userDesignation }}</span>
+    </div>
+    <div class="user-info-field">
+      <span class="user-info-label">Ward</span>
+      <span class="user-info-value">{{ userWard }}</span>
+    </div>
+  </div>
+
+  <!-- Read-only notice for non-Ward users -->
+  <div class="readonly-notice" *ngIf="!canEdit">
+    &#128274; You are in view-only mode. Only Ward Managers can add or edit items.
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table class="work-order-table">
+      <thead>
+        <tr>
+          <th class="col-sno">S.No.</th>
+          <th class="col-desc">Description</th>
+          <th class="col-numbers">Numbers</th>
+          <th class="col-length">Length</th>
+          <th class="col-breadth">Breadth</th>
+          <th class="col-depth">Depth</th>
+          <th class="col-qty">Quantity</th>
+          <th class="col-rate">Rate</th>
+          <th class="col-unit">Unit</th>
+          <th class="col-amount">Amount</th>
+          <th class="col-ismaterial">Is Material</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Saved rows -->
+        <tr *ngFor="let item of savedItems; let i = index; trackBy: trackByIndex" class="saved-row">
+          <td class="center">{{ item.sNo }}</td>
+          <td>{{ item.description }}</td>
+          <td class="center">{{ item.numbers }}</td>
+          <td class="center">{{ item.length }}</td>
+          <td class="center">{{ item.breadth }}</td>
+          <td class="center">{{ item.depth }}</td>
+          <td class="center">{{ item.quantity }}</td>
+          <td class="center">{{ item.rate }}</td>
+          <td class="center">{{ item.unit }}</td>
+          <td class="center">{{ item.amount | number:'1.2-2' }}</td>
+          <td class="center">{{ item.isMaterial }}</td>
+          <td class="center">
+            <button class="btn-edit" (click)="onEdit(i)">Edit</button>
+            <button class="btn-delete" (click)="onDelete(i)">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Editing row — only for Ward Managers -->
+        <tr class="edit-row" *ngIf="canEdit">
+          <td class="center">{{ currentItem.sNo }}</td>
+
+          <!-- Description with autocomplete -->
+          <td class="desc-cell">
+            <div class="autocomplete-wrapper">
+              <input
+                type="text"
+                [(ngModel)]="currentItem.description"
+                (input)="onDescriptionInput()"
+                (blur)="closeDropdown()"
+                name="description"
+                class="input-description"
+                placeholder="Type to search..."
+                autocomplete="off"
+              />
+              <!-- Loading indicator -->
+              <span *ngIf="isLoadingSuggestions" class="loading-dots">...</span>
+
+              <!-- Suggestions dropdown -->
+              <ul class="suggestions-list" *ngIf="showDropdown && suggestions.length > 0">
+                <li
+                  *ngFor="let s of suggestions"
+                  (mousedown)="onSelectSuggestion(s)"
+                  class="suggestion-item"
+                >
+                  <span class="sug-desc">{{ s.description }}</span>
+                  <span class="sug-meta">{{ s.unit }} &nbsp;|&nbsp; ₹{{ s.rate }}</span>
+                </li>
+              </ul>
+            </div>
+          </td>
+
+          <td>
+            <input type="number" [(ngModel)]="currentItem.numbers" (ngModelChange)="onDimensionChange()" name="numbers" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.length" (ngModelChange)="onDimensionChange()" name="length" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.breadth" (ngModelChange)="onDimensionChange()" name="breadth" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.depth" (ngModelChange)="onDimensionChange()" name="depth" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.quantity" (ngModelChange)="onQuantityChange()" name="quantity" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.rate" (ngModelChange)="onRateChange()" name="rate" class="input-dim" min="0" />
+          </td>
+          <td>
+            <input type="text" [(ngModel)]="currentItem.unit" name="unit" class="input-unit" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="currentItem.amount" name="amount" class="input-dim" min="0" />
+          </td>
+          <td>
+            <select [(ngModel)]="currentItem.isMaterial" name="isMaterial" class="select-material">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </td>
+          <td class="center">
+            <button class="btn-add" (click)="onAdd()">Add</button>
+            <button class="btn-cancel" (click)="onCancel()">Cancel</button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- Row Total -->
+    <div class="row-total">
+      <span class="total-label">Total</span>
+      <span class="total-value">{{ getRowTotal() | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Totals Section -->
+  <div class="totals-section">
+    <div class="totals-header">Totals</div>
+    <div class="totals-body">
+      <div class="totals-row">
+
+        <div class="totals-field">
+          <label>Total Amount</label>
+          <input type="number" [(ngModel)]="totals.totalAmount" (ngModelChange)="onTotalAmountChange()" name="totalAmount" class="totals-input" placeholder="0.00" />
+        </div>
+
+        <div class="totals-field">
+          <label>
+            GST
+            <select [(ngModel)]="selectedGstRate" (ngModelChange)="onGstRateChange()" name="gstRate" class="gst-select">
+              <option *ngFor="let g of gstOptions" [value]="g">{{ g }}%</option>
+            </select>
+          </label>
+          <input type="number" [(ngModel)]="totals.gst" name="gstAmount" class="totals-input" placeholder="0.00" />
+        </div>
+
+        <div class="totals-field">
+          <label>Grand Total</label>
+          <input type="number" [(ngModel)]="totals.grandTotal" name="grandTotal" class="totals-input grand-input" placeholder="0.00" />
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Generate Sheet Button -->
+  <div class="generate-btn-row">
+    <button class="btn-generate" (click)="openSheet()">&#128196; Generate Sheet</button>
+  </div>
+
+</div>
+
+<!-- ═══ SHEET MODAL ═══ -->
+<div class="sheet-overlay" *ngIf="showSheet" (click)="closeSheet()">
+  <div class="sheet-modal" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="sheet-modal-header">
+      <h2>Generated Sheet — {{ nameOfWork || 'Work Order' }}</h2>
+      <button class="btn-close-modal" (click)="closeSheet()">&#10005;</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="sheet-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'material'" (click)="activeTab = 'material'">
+        &#127963; Material Sheet
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'nonmaterial'" (click)="activeTab = 'nonmaterial'">
+        &#128296; Non-Material Sheet
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'abstract'" (click)="activeTab = 'abstract'">
+        &#128203; Abstract
+      </button>
+    </div>
+
+    <!-- Sheet Content -->
+    <div class="sheet-content">
+
+      <!-- ── MATERIAL SHEET ── -->
+      <div *ngIf="activeTab === 'material'">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Item Description</th>
+              <th>Numbers</th>
+              <th>Length</th>
+              <th>Breadth</th>
+              <th>Depth</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of materialItems; let i = index">
+              <td class="center">{{ i + 1 }}</td>
+              <td>{{ item.description }}</td>
+              <td class="center">{{ item.numbers }}</td>
+              <td class="center">{{ item.length || '-' }}</td>
+              <td class="center">{{ item.breadth || '-' }}</td>
+              <td class="center">{{ item.depth || '-' }}</td>
+              <td class="center">{{ item.quantity }}</td>
+              <td class="center">{{ item.unit }}</td>
+              <td class="right">{{ item.rate | number:'1.2-2' }}</td>
+              <td class="right">{{ item.amount | number:'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="materialItems.length === 0">
+              <td colspan="10" class="empty-row">No material items added.</td>
+            </tr>
+          </tbody>
+          <tfoot *ngIf="materialItems.length > 0">
+            <tr class="total-row">
+              <td colspan="9" class="right"><strong>Total Amount</strong></td>
+              <td class="right"><strong>{{ materialTotal | number:'1.2-2' }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- ── NON-MATERIAL SHEET ── -->
+      <div *ngIf="activeTab === 'nonmaterial'">
+        <table class="sheet-table">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Item Description</th>
+              <th>Numbers</th>
+              <th>Length</th>
+              <th>Breadth</th>
+              <th>Depth</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of nonMaterialItems; let i = index">
+              <td class="center">{{ i + 1 }}</td>
+              <td>{{ item.description }}</td>
+              <td class="center">{{ item.numbers }}</td>
+              <td class="center">{{ item.length || '-' }}</td>
+              <td class="center">{{ item.breadth || '-' }}</td>
+              <td class="center">{{ item.depth || '-' }}</td>
+              <td class="center">{{ item.quantity }}</td>
+              <td class="center">{{ item.unit }}</td>
+              <td class="right">{{ item.rate | number:'1.2-2' }}</td>
+              <td class="right">{{ item.amount | number:'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="nonMaterialItems.length === 0">
+              <td colspan="10" class="empty-row">No non-material items added.</td>
+            </tr>
+          </tbody>
+          <tfoot *ngIf="nonMaterialItems.length > 0">
+            <tr class="total-row">
+              <td colspan="9" class="right"><strong>Total Amount</strong></td>
+              <td class="right"><strong>{{ nonMaterialTotal | number:'1.2-2' }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- ── ABSTRACT SHEET ── -->
+      <div *ngIf="activeTab === 'abstract'">
+        <table class="sheet-table abstract-table">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Description</th>
+              <th class="right">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="center">1</td>
+              <td>Material Items Total</td>
+              <td class="right">{{ materialTotal | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td class="center">2</td>
+              <td>Non-Material Items Total</td>
+              <td class="right">{{ nonMaterialTotal | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td class="center">3</td>
+              <td>GST ({{ selectedGstRate }}%)</td>
+              <td class="right">{{ totals.gst | number:'1.2-2' }}</td>
+            </tr>
+            <tr>
+              <td class="center">4</td>
+              <td>LST</td>
+              <td class="right">0.00</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="2" class="right"><strong>Grand Total</strong></td>
+              <td class="right"><strong>{{ abstractGrandTotal | number:'1.2-2' }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

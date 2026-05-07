@@ -1,0 +1,75 @@
+<div class="login-page">
+
+  <!-- Login Card -->
+  <div class="login-card">
+
+    <!-- Logo + Organisation -->
+    <div class="login-header">
+      <div class="logo-circle">
+        <span class="logo-icon">&#127963;</span>
+      </div>
+      <h1 class="org-name">Municipal Corporation</h1>
+      <p class="org-subtitle">Works &amp; Infrastructure Department</p>
+      <div class="divider"></div>
+      <h2 class="app-title">Work Order Management System</h2>
+    </div>
+
+    <!-- Form -->
+    <div class="login-form">
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-wrapper">
+          <span class="input-icon">&#128100;</span>
+          <input
+            type="text"
+            id="username"
+            [(ngModel)]="username"
+            name="username"
+            placeholder="Enter your username"
+            class="form-input"
+            (keyup.enter)="onLogin()"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">&#128274;</span>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            class="form-input"
+            (keyup.enter)="onLogin()"
+          />
+          <span class="toggle-password" (click)="togglePassword()">
+            {{ showPassword ? '&#128065;' : '&#128064;' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div class="error-msg" *ngIf="errorMsg">
+        &#9888; {{ errorMsg }}
+      </div>
+
+      <!-- Login button -->
+      <button class="btn-login" (click)="onLogin()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Login</span>
+        <span *ngIf="isLoading">Logging in...</span>
+      </button>
+
+    </div>
+
+    <div class="login-footer">
+      &copy; 2025 Municipal Corporation. All rights reserved.
+    </div>
+
+  </div>
+
+</div>

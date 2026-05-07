@@ -1,0 +1,173 @@
+/* ── Top Navbar (same as work-order) ── */
+.top-navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background-color: #8b8040; color: white;
+  padding: 10px 20px; margin-bottom: 0;
+}
+.navbar-left  { display: flex; align-items: center; gap: 10px; }
+.navbar-logo  { font-size: 20px; }
+.navbar-title { font-size: 15px; font-weight: bold; letter-spacing: 0.3px; }
+.navbar-right { display: flex; align-items: center; gap: 14px; }
+.navbar-user-info { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.navbar-user        { font-size: 13px; opacity: 0.9; }
+.navbar-designation { font-size: 11px; opacity: 0.75; }
+.btn-logout {
+  background-color: rgba(255,255,255,0.2); color: white;
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 3px;
+  padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-logout:hover { background-color: rgba(255,255,255,0.35); }
+
+/* ── Page ── */
+.dashboard-page {
+  font-family: Arial, sans-serif; font-size: 13px;
+  background-color: #f5f5f0; min-height: calc(100vh - 44px); padding: 20px;
+}
+
+/* ── Dashboard Header ── */
+.dashboard-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  background-color: #fefef5; border: 1px solid #d0c97a; border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.dashboard-header h1 { font-size: 18px; color: #333; margin: 0 0 8px; }
+.user-badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: bold;
+}
+.badge-designation { background-color: #1565c0; color: white; }
+.badge-dept        { background-color: #8b8040; color: white; }
+.badge-ward        { background-color: #2e7d32; color: white; }
+
+.btn-new-work {
+  background-color: #2e7d32; color: white; border: none;
+  border-radius: 4px; padding: 9px 18px; font-size: 13px;
+  font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+.btn-new-work:hover { background-color: #1b5e20; }
+
+/* ── Works Section ── */
+.works-section {
+  border: 1px solid #c8c07a; border-radius: 3px; overflow: hidden;
+}
+.section-title {
+  background-color: #8b8040; color: white; font-weight: bold;
+  font-size: 13px; padding: 8px 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.stage-badge {
+  background-color: rgba(255,255,255,0.25); color: white;
+  padding: 2px 10px; border-radius: 10px; font-size: 12px;
+}
+
+/* ── Works Table ── */
+.works-table {
+  width: 100%; border-collapse: collapse; background-color: #fefef5;
+}
+.works-table thead tr { background-color: #add8e6; }
+.works-table thead th {
+  padding: 8px 10px; text-align: left; font-size: 12px; font-weight: bold;
+  color: #333; border-right: 1px solid #b8cfd8; border-bottom: 2px solid #93b8c5;
+  white-space: nowrap;
+}
+.works-table thead th:last-child { border-right: none; }
+.works-table tbody tr { border-bottom: 1px solid #e0d88a; background-color: #fffff0; }
+.works-table tbody tr:hover { background-color: #f5f5d8; }
+.works-table tbody td {
+  padding: 9px 10px; font-size: 13px; color: #333;
+  border-right: 1px solid #e0d88a;
+}
+.works-table tbody td:last-child { border-right: none; }
+.center { text-align: center; }
+
+/* Work ID tag */
+.work-id-tag {
+  background-color: #1565c0; color: white; font-weight: bold;
+  padding: 3px 10px; border-radius: 4px; font-size: 12px;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: capitalize;
+}
+.status-draft     { background-color: #fff9c4; color: #f57f17; border: 1px solid #f9a825; }
+.status-submitted { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+
+/* Action buttons */
+.action-cell { white-space: nowrap; }
+.btn-view {
+  background-color: #1565c0; color: white; border: none;
+  border-radius: 3px; padding: 4px 10px; font-size: 11px;
+  font-weight: bold; cursor: pointer; margin-right: 6px;
+}
+.btn-view:hover { background-color: #0d47a1; }
+.btn-submit {
+  background-color: #2e7d32; color: white; border: none;
+  border-radius: 3px; padding: 4px 10px; font-size: 11px;
+  font-weight: bold; cursor: pointer;
+}
+.btn-submit:hover { background-color: #1b5e20; }
+.final-badge {
+  background-color: #7b1fa2; color: white;
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold;
+}
+
+/* Empty / loading */
+.empty-msg {
+  text-align: center; padding: 40px; color: #999;
+  background-color: #fffff0; font-size: 14px;
+}
+.empty-msg span { font-size: 32px; display: block; margin-bottom: 8px; }
+.loading-msg { padding: 20px; text-align: center; color: #666; background: #fffff0; }
+.error-msg   { padding: 12px; color: #c62828; background: #ffebee; }
+
+/* ── Submit Dialog ── */
+.dialog-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.dialog-box {
+  background: #fefef5; border: 1px solid #d0c97a; border-radius: 6px;
+  width: 460px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); overflow: hidden;
+}
+.dialog-header {
+  background-color: #8b8040; color: white;
+  font-weight: bold; font-size: 14px; padding: 12px 16px;
+}
+.dialog-body { padding: 16px 20px; }
+.dialog-work-name { font-size: 14px; font-weight: bold; color: #333; margin: 0 0 4px; }
+.dialog-info { font-size: 12px; color: #666; margin: 0 0 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
+.remarks-input {
+  width: 100%; border: 1px solid #c8c07a; border-radius: 3px;
+  padding: 6px 8px; font-size: 13px; background-color: #fffff0;
+  font-family: Arial, sans-serif; resize: vertical; box-sizing: border-box;
+}
+.remarks-input:focus { outline: none; border-color: #8fbc5a; }
+.alert-success {
+  background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32;
+  padding: 8px 12px; border-radius: 4px; font-size: 13px; margin-top: 10px;
+}
+.alert-error {
+  background: #ffebee; border: 1px solid #ef9a9a; color: #c62828;
+  padding: 8px 12px; border-radius: 4px; font-size: 13px; margin-top: 10px;
+}
+.dialog-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 12px 20px; border-top: 1px solid #e0d88a; background: #fefef5;
+}
+.btn-cancel-dialog {
+  background-color: #6c757d; color: white; border: none;
+  border-radius: 3px; padding: 7px 16px; font-size: 13px; cursor: pointer;
+}
+.btn-cancel-dialog:hover { background-color: #5a6268; }
+.btn-cancel-dialog:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-confirm-submit {
+  background-color: #2e7d32; color: white; border: none;
+  border-radius: 3px; padding: 7px 18px; font-size: 13px;
+  font-weight: bold; cursor: pointer;
+}
+.btn-confirm-submit:hover { background-color: #1b5e20; }
+.btn-confirm-submit:disabled { background-color: #a5d6a7; cursor: not-allowed; }

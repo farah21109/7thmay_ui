@@ -1,0 +1,123 @@
+<!-- Top Navbar -->
+<div class="top-navbar">
+  <div class="navbar-left">
+    <span class="navbar-logo">&#127963;</span>
+    <span class="navbar-title">Work Order Management System</span>
+  </div>
+  <div class="navbar-right">
+    <div class="navbar-user-info">
+      <span class="navbar-user">&#128100; {{ userName }}</span>
+      <span class="navbar-designation">{{ userDesignation }}</span>
+    </div>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="dashboard-page">
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1>Dashboard</h1>
+      <div class="user-badge-row">
+        <span class="badge badge-designation">{{ userDesignation }}</span>
+        <span class="badge badge-dept">{{ userDepartment }}</span>
+        <span class="badge badge-ward" *ngIf="user?.ward">Ward: {{ userWard }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- Only Manager can create new work -->
+      <button class="btn-new-work" *ngIf="myStage === 'Manager'" (click)="goToNewWork()">
+        + New Work Order
+      </button>
+    </div>
+  </div>
+
+  <!-- Works Table -->
+  <div class="works-section">
+    <div class="section-title">
+      Works at Your Stage
+      <span class="stage-badge">{{ myStage }}</span>
+    </div>
+
+    <div class="loading-msg" *ngIf="isLoading">Loading works...</div>
+    <div class="error-msg"   *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <table class="works-table" *ngIf="!isLoading && works.length > 0">
+      <thead>
+        <tr>
+          <th>Work ID</th>
+          <th>Name of Work</th>
+          <th>Ward</th>
+          <th>Division</th>
+          <th>Status</th>
+          <th>Current Stage</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let work of works">
+          <td class="center"><span class="work-id-tag">{{ work.work_id }}</span></td>
+          <td>{{ work.name_of_work }}</td>
+          <td class="center">{{ work.ward || '—' }}</td>
+          <td class="center">{{ work.division || '—' }}</td>
+          <td class="center">
+            <span class="status-badge" [ngClass]="'status-' + work.status">
+              {{ work.status }}
+            </span>
+          </td>
+          <td class="center">{{ work.current_stage }}</td>
+          <td class="center action-cell">
+            <button class="btn-view" (click)="viewWork(work)">View</button>
+            <button class="btn-submit"
+                    (click)="openSubmitDialog(work)"
+                    *ngIf="!isDirector">
+              Submit to {{ nextStageLabel }}
+            </button>
+            <span *ngIf="isDirector" class="final-badge">Final Approver</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-msg" *ngIf="!isLoading && works.length === 0">
+      <span>&#128196;</span>
+      <p>No works pending at your stage.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ SUBMIT DIALOG ═══ -->
+<div class="dialog-overlay" *ngIf="showSubmitDialog" (click)="closeSubmitDialog()">
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      Submit Work to {{ nextStageLabel }}
+    </div>
+    <div class="dialog-body">
+      <p class="dialog-work-name">{{ selectedWork?.name_of_work }}</p>
+      <p class="dialog-info">
+        Work ID: <strong>{{ selectedWork?.work_id }}</strong>
+      </p>
+      <div class="form-group">
+        <label>Remarks (optional)</label>
+        <textarea
+          [(ngModel)]="submitRemarks"
+          name="remarks"
+          class="remarks-input"
+          placeholder="Add any remarks before submitting..."
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="alert-success" *ngIf="submitSuccess">&#10003; {{ submitSuccess }}</div>
+      <div class="alert-error"   *ngIf="submitError">&#10007; {{ submitError }}</div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-cancel-dialog" (click)="closeSubmitDialog()" [disabled]="isSubmitting">Cancel</button>
+      <button class="btn-confirm-submit" (click)="onSubmit()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Submit to {{ nextStageLabel }}</span>
+        <span *ngIf="isSubmitting">Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>

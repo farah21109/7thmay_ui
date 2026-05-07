@@ -1,0 +1,64 @@
+<!-- Top Navbar -->
+<div class="top-navbar">
+  <div class="navbar-left">
+    <span class="navbar-logo">&#127963;</span>
+    <span class="navbar-title">Work Order Management System</span>
+  </div>
+  <div class="navbar-right">
+    <div class="navbar-user-info">
+      <span class="navbar-user">&#128100; {{ userName }}</span>
+      <span class="navbar-designation">{{ userDesignation }} | {{ userDepartment }}</span>
+    </div>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="home-page">
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h2>Welcome, {{ userName }}</h2>
+      <p>{{ userDesignation }} &nbsp;|&nbsp; {{ userDepartment }}
+        <span *ngIf="userWard !== '—'">&nbsp;|&nbsp; Ward: {{ userWard }}</span>
+      </p>
+    </div>
+    <div class="welcome-icon">&#127963;</div>
+  </div>
+
+  <!-- Menu Cards -->
+  <div class="menu-grid">
+
+    <!-- Prepare Estimate -->
+    <div class="menu-card" (click)="goToPrepareEstimate()">
+      <div class="card-icon">&#128196;</div>
+      <div class="card-body">
+        <h3>Prepare Estimate</h3>
+        <p>Create a new work estimate or view existing work by entering Work ID.</p>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </div>
+
+    <!-- Edit Estimate -->
+    <div class="menu-card" (click)="goToEditEstimate()">
+      <div class="card-icon">&#9999;</div>
+      <div class="card-body">
+        <h3>Edit Estimate</h3>
+        <p>Edit and review estimates submitted to your level. Submit to next level when ready.</p>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </div>
+
+    <!-- Reports -->
+    <div class="menu-card" (click)="goToReports()">
+      <div class="card-icon">&#128202;</div>
+      <div class="card-body">
+        <h3>Reports</h3>
+        <p>View the abstract and summary report for any work by entering its Work ID.</p>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </div>
+
+  </div>
+
+</div>

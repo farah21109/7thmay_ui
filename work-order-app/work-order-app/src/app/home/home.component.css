@@ -1,0 +1,102 @@
+/* ── Navbar ── */
+.top-navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background-color: #8b8040; color: white;
+  padding: 10px 20px;
+  font-family: Arial, sans-serif;
+}
+.navbar-left  { display: flex; align-items: center; gap: 10px; }
+.navbar-logo  { font-size: 20px; }
+.navbar-title { font-size: 15px; font-weight: bold; letter-spacing: 0.3px; }
+.navbar-right { display: flex; align-items: center; gap: 14px; }
+.navbar-user-info { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.navbar-user        { font-size: 13px; }
+.navbar-designation { font-size: 11px; opacity: 0.8; }
+.btn-logout {
+  background-color: rgba(255,255,255,0.2); color: white;
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 3px;
+  padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-logout:hover { background-color: rgba(255,255,255,0.35); }
+
+/* ── Page ── */
+.home-page {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f0;
+  min-height: calc(100vh - 44px);
+  padding: 24px 28px;
+}
+
+/* ── Welcome Banner ── */
+.welcome-banner {
+  background-color: #8b8040;
+  color: white;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.welcome-text h2 { margin: 0 0 6px; font-size: 20px; }
+.welcome-text p  { margin: 0; font-size: 13px; opacity: 0.85; }
+.welcome-icon    { font-size: 48px; opacity: 0.3; }
+
+/* ── Menu Grid ── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Menu Card ── */
+.menu-card {
+  background-color: #fefef5;
+  border: 1px solid #d0c97a;
+  border-radius: 6px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  position: relative;
+}
+.menu-card:hover {
+  border-color: #8b8040;
+  box-shadow: 0 4px 14px rgba(139,128,64,0.2);
+  transform: translateY(-2px);
+  background-color: #fffff0;
+}
+
+.card-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.card-body h3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 6px;
+}
+.card-body p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card-arrow {
+  font-size: 20px;
+  color: #8b8040;
+  font-weight: bold;
+  align-self: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .menu-grid { grid-template-columns: 1fr; }
+}

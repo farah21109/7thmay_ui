@@ -1,0 +1,225 @@
+<!-- Navbar -->
+<div class="top-navbar">
+  <div class="navbar-left">
+    <span class="navbar-logo">&#127963;</span>
+    <span class="navbar-title">Work Order Management System</span>
+  </div>
+  <div class="navbar-right">
+    <div class="navbar-user-info">
+      <span class="navbar-user">&#128100; {{ userName }}</span>
+      <span class="navbar-designation">{{ userDesignation }}</span>
+    </div>
+    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- Work ID Lookup -->
+  <div class="lookup-section">
+    <div class="section-title">Edit Estimate — Enter Work ID / Name</div>
+    <div class="lookup-body">
+      <div class="lookup-row">
+        <input type="text" [(ngModel)]="workIdInput" name="workIdInput"
+          class="lookup-input" placeholder="Enter Work ID or Work Name..."
+          (keyup.enter)="onCheckWorkId()" />
+        <button class="btn-check" (click)="onCheckWorkId()" [disabled]="isChecking">
+          <span *ngIf="!isChecking">Search</span>
+          <span *ngIf="isChecking">Searching...</span>
+        </button>
+      </div>
+      <div class="check-error" *ngIf="checkError">&#9888; {{ checkError }}</div>
+    </div>
+  </div>
+
+  <!-- Work found -->
+  <div *ngIf="workChecked && workFound">
+
+    <!-- Not your stage notice -->
+    <div class="view-only-notice" *ngIf="!canEditWork">
+      &#128274; This work is currently at stage <strong>{{ workStage }}</strong>.
+      You can only view it. Your stage is <strong>{{ myStage }}</strong>.
+    </div>
+
+    <!-- Your stage — editable -->
+    <div class="editable-notice" *ngIf="canEditWork">
+      &#9999; This work is at your stage (<strong>{{ myStage }}</strong>). You can edit and submit to <strong>{{ nextStage }}</strong>.
+    </div>
+
+    <div class="work-order-container">
+
+      <div class="name-of-work-row">
+        <label class="required-label">Name Of Work</label>
+        <input type="text" class="name-of-work-input" [(ngModel)]="nameOfWork"
+          name="nameOfWork" [readonly]="!canEditWork" />
+      </div>
+
+      <div class="info-row" *ngIf="!canEditWork">
+        <span *ngIf="selectedDivision"><strong>Division:</strong> {{ selectedDivision }}</span>
+        <span *ngIf="selectedCircle"><strong>Circle:</strong> {{ selectedCircle }}</span>
+        <span *ngIf="selectedWard"><strong>Ward:</strong> {{ selectedWard }}</span>
+      </div>
+
+      <div class="dropdown-row" *ngIf="canEditWork">
+        <div class="dropdown-field">
+          <label>Circle</label>
+          <select [(ngModel)]="selectedCircle" name="circle" class="dropdown-select">
+            <option value="">-- Select Circle --</option>
+            <option *ngFor="let c of circles" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div class="dropdown-field">
+          <label>Division</label>
+          <select [(ngModel)]="selectedDivision" name="division" class="dropdown-select">
+            <option value="">-- Select Division --</option>
+            <option *ngFor="let d of divisions" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="dropdown-field">
+          <label>Ward</label>
+          <select [(ngModel)]="selectedWard" name="ward" class="dropdown-select">
+            <option value="">-- Select Ward --</option>
+            <option *ngFor="let w of wards" [value]="w">{{ w }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="work-order-table">
+          <thead>
+            <tr>
+              <th class="col-sno">S.No.</th>
+              <th class="col-desc">Description</th>
+              <th class="col-numbers">Numbers</th>
+              <th class="col-length">Length</th>
+              <th class="col-breadth">Breadth</th>
+              <th class="col-depth">Depth</th>
+              <th class="col-qty">Quantity</th>
+              <th class="col-rate">Rate</th>
+              <th class="col-unit">Unit</th>
+              <th class="col-amount">Amount</th>
+              <th class="col-ismaterial">Is Material</th>
+              <th class="col-action" *ngIf="canEditWork">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of savedItems; let i = index; trackBy: trackByIndex" class="saved-row">
+              <td class="center">{{ item.sNo }}</td>
+              <td>{{ item.description }}</td>
+              <td class="center">{{ item.numbers }}</td>
+              <td class="center">{{ item.length  || '-' }}</td>
+              <td class="center">{{ item.breadth || '-' }}</td>
+              <td class="center">{{ item.depth   || '-' }}</td>
+              <td class="center">{{ item.quantity }}</td>
+              <td class="center">{{ item.rate }}</td>
+              <td class="center">{{ item.unit }}</td>
+              <td class="center">{{ item.amount | number:'1.2-2' }}</td>
+              <td class="center">{{ item.isMaterial }}</td>
+              <td class="center" *ngIf="canEditWork">
+                <button class="btn-edit-row" (click)="onEdit(i)">Edit</button>
+                <button class="btn-delete-row" (click)="onDelete(i)">Delete</button>
+              </td>
+            </tr>
+
+            <!-- Edit row only if canEdit -->
+            <tr class="edit-row" *ngIf="canEditWork">
+              <td class="center">{{ currentItem.sNo }}</td>
+              <td class="desc-cell">
+                <div class="autocomplete-wrapper">
+                  <input type="text" [(ngModel)]="currentItem.description"
+                    (input)="onDescriptionInput()" (blur)="closeDropdown()"
+                    name="description" class="input-description" placeholder="Type to search..." autocomplete="off" />
+                  <ul class="suggestions-list" *ngIf="showDropdown && suggestions.length > 0">
+                    <li *ngFor="let s of suggestions" (mousedown)="onSelectSuggestion(s)" class="suggestion-item">
+                      <span class="sug-desc">{{ s.description }}</span>
+                      <span class="sug-meta">{{ s.unit }} | &#8377;{{ s.rate }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+              <td><input type="number" [(ngModel)]="currentItem.numbers"  (ngModelChange)="onDimensionChange()" name="numbers"  class="input-dim" min="0" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.length"   (ngModelChange)="onDimensionChange()" name="length"   class="input-dim" min="0" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.breadth"  (ngModelChange)="onDimensionChange()" name="breadth"  class="input-dim" min="0" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.depth"    (ngModelChange)="onDimensionChange()" name="depth"    class="input-dim" min="0" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.quantity" (ngModelChange)="onQuantityChange()"  name="quantity" class="input-dim" min="0" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.rate"     (ngModelChange)="onRateChange()"      name="rate"     class="input-dim" min="0" /></td>
+              <td><input type="text"   [(ngModel)]="currentItem.unit"     name="unit"     class="input-unit" /></td>
+              <td><input type="number" [(ngModel)]="currentItem.amount"   name="amount"   class="input-dim" min="0" /></td>
+              <td>
+                <select [(ngModel)]="currentItem.isMaterial" name="isMaterial" class="select-material">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </td>
+              <td class="center">
+                <button class="btn-add" (click)="onAdd()">Add</button>
+                <button class="btn-cancel" (click)="onCancel()">Cancel</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row-total">
+          <span class="total-label">Total</span>
+          <span class="total-value">{{ getRowTotal() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Totals (editable only if canEditWork) -->
+      <div class="totals-section">
+        <div class="totals-header">Totals</div>
+        <div class="totals-body">
+          <div class="totals-row">
+            <div class="totals-field">
+              <label>Total Amount</label>
+              <input type="number" [(ngModel)]="totals.totalAmount" (ngModelChange)="onTotalAmountChange()" name="totalAmount" class="totals-input" [readonly]="!canEditWork" placeholder="0.00" />
+            </div>
+            <div class="totals-field">
+              <label>GST
+                <select [(ngModel)]="selectedGstRate" (ngModelChange)="onGstRateChange()" name="gstRate" class="gst-select" [disabled]="!canEditWork">
+                  <option *ngFor="let g of gstOptions" [value]="g">{{ g }}%</option>
+                </select>
+              </label>
+              <input type="number" [(ngModel)]="totals.gst" name="gstAmount" class="totals-input" [readonly]="!canEditWork" placeholder="0.00" />
+            </div>
+            <div class="totals-field">
+              <label>Grand Total</label>
+              <input type="number" [(ngModel)]="totals.grandTotal" name="grandTotal" class="totals-input grand-input" [readonly]="!canEditWork" placeholder="0.00" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-btn-row" *ngIf="canEditWork">
+        <button class="btn-generate" (click)="onGenerateSheet()">&#128196; Generate Sheet</button>
+        <button class="btn-submit-work" (click)="openSubmitDialog()">&#9650; Submit to {{ nextStage }}</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Submit Dialog -->
+<div class="dialog-overlay" *ngIf="showSubmitDialog" (click)="closeSubmitDialog()">
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <div class="dialog-header">Submit to {{ nextStage }}</div>
+    <div class="dialog-body">
+      <p class="dialog-work-name">{{ nameOfWork }}</p>
+      <div class="form-group">
+        <label>Remarks (optional)</label>
+        <textarea [(ngModel)]="submitRemarks" name="remarks" class="remarks-input" rows="3" placeholder="Add remarks..."></textarea>
+      </div>
+      <div class="alert-success" *ngIf="submitSuccess">&#10003; {{ submitSuccess }}</div>
+      <div class="alert-error"   *ngIf="submitError">&#10007; {{ submitError }}</div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-cancel-dialog" (click)="closeSubmitDialog()" [disabled]="isSubmitting">Cancel</button>
+      <button class="btn-confirm-submit" (click)="onSubmit()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Submit to {{ nextStage }}</span>
+        <span *ngIf="isSubmitting">Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>
