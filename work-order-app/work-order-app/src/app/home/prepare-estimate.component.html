@@ -1,6 +1,7 @@
 <!-- Navbar -->
 <div class="top-navbar">
   <div class="navbar-left">
+    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
     <span class="navbar-logo">&#127963;</span>
     <span class="navbar-title">Work Order Management System</span>
   </div>
@@ -9,7 +10,7 @@
       <span class="navbar-user">&#128100; {{ userName }}</span>
       <span class="navbar-designation">{{ userDesignation }}</span>
     </div>
-    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
   </div>
 </div>
 
@@ -38,11 +39,25 @@
       <span class="banner-icon">&#128065;</span>
       <div class="banner-text">
         <strong>View Only</strong>
-        <span>Work ID <strong>{{ existingWorkId }}</strong> is currently at stage
+        <span *ngIf="!submitDateTime">Work ID <strong>{{ existingWorkId }}</strong> is currently at stage
           <strong>{{ currentStage }}</strong>. Your stage is <strong>{{ userDesignation }}</strong>.
           You can only view this work.
         </span>
+        <span *ngIf="submitDateTime">
+          &#10003; Successfully submitted to <strong>{{ lastToStage }}</strong>
+          on <strong>{{ submitDateTime }}</strong>.
+          This work is now in view-only mode for you.
+        </span>
       </div>
+    </div>
+
+    <!-- Submitted info bar -->
+    <div class="submitted-info-bar" *ngIf="lastSubmittedAt">
+      <span class="sib-icon">&#9993;</span>
+      <span>Submitted by <strong>{{ lastSubmittedBy }}</strong>
+        to <strong>{{ lastToStage }}</strong>
+        on <strong>{{ lastSubmittedAt }}</strong>
+      </span>
     </div>
 
     <div class="work-order-container">
@@ -164,7 +179,7 @@
     <div class="name-of-work-row">
       <label class="required-label">* Name Of Work</label>
       <input type="text" class="name-of-work-input" placeholder="Name Of Work"
-        [(ngModel)]="nameOfWork" name="nameOfWork" />
+        [(ngModel)]="nameOfWork" name="nameOfWork" (input)="saveDraft()" />
     </div>
 
     <div class="dropdown-row">
@@ -298,35 +313,20 @@
       </div>
     </div>
 
-    <!-- Action buttons -->
+    <!-- Draft restored banner -->
+    <div class="draft-restored-banner" *ngIf="draftRestoredMsg">
+      &#128196; {{ draftRestoredMsg }} &nbsp;
+      <span class="draft-clear-link" (click)="clearDraft(); savedItems=[]; nameOfWork=''; workChecked=false; draftRestoredMsg=''">Clear draft</span>
+    </div>
+
+    <!-- Action buttons — always show both -->
     <div class="action-btn-row">
-      <button class="btn-generate" (click)="onGenerateSheet()">&#128196; Submit</button>
-    </div>
-
-    <!-- Submit timestamp shown after clicking Submit -->
-    <div class="submit-timestamp" *ngIf="submitDateTime">
-      &#10003; Submitted on <strong>{{ submitDateTime }}</strong> by <strong>{{ userName }}</strong>
-    </div>
-
-    <!-- Last submitted info (from DB) -->
-    <div class="last-submitted-info" *ngIf="lastSubmittedAt && !submitDateTime">
-      <span class="info-icon">&#128337;</span>
-      Last submitted by <strong>{{ lastSubmittedBy }}</strong>
-      ({{ lastFromStage }} &#8594; {{ lastToStage }})
-      on <strong>{{ lastSubmittedAt }}</strong>
-    </div>
-
-    <!-- Submit to next stage button (for editable work) -->
-    <div class="stage-submit-row" *ngIf="isEditable && nextStage">
-      <button class="btn-submit-work" (click)="openSubmitDialog()">
-        &#9650; Submit to {{ nextStage }}
+      <button class="btn-generate" (click)="onGenerateSheet()">
+        &#128196; Generate Abstract
       </button>
-      <div class="last-submitted-info" *ngIf="lastSubmittedAt">
-        <span class="info-icon">&#128337;</span>
-        Last submitted by <strong>{{ lastSubmittedBy }}</strong>
-        ({{ lastFromStage }} &#8594; {{ lastToStage }})
-        on <strong>{{ lastSubmittedAt }}</strong>
-      </div>
+      <button class="btn-submit-work" (click)="openSubmitDialog()">
+        &#9650; Submit to {{ nextStage || 'Next Level' }}
+      </button>
     </div>
 
   </div>

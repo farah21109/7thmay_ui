@@ -74,6 +74,12 @@
 .card-icon {
   font-size: 36px;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.card-icon svg {
+  display: block;
 }
 
 .card-body h3 {

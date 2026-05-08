@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AbstractStateService } from '../work-order/abstract-state.service';
+import { AuthService } from '../login/auth.service';
 
 @Component({
   selector: 'app-abstract',
@@ -46,8 +47,15 @@ export class AbstractComponent implements OnInit {
   constructor(
     private stateService: AbstractStateService,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {}
+
+  get userName()        { return this.auth.getSession()?.name        || ''; }
+  get userDesignation() { return this.auth.getSession()?.designation || ''; }
+  get isDirector()      { return this.userDesignation === 'Director'; }
+
+  onLogout(): void { this.auth.logout(); this.router.navigate(['/login']); }
 
   ngOnInit(): void {
     const state = this.stateService.getState();

@@ -69,12 +69,18 @@ export class EditEstimateComponent implements OnInit {
   isLoadingSuggestions: boolean = false;
   private searchTimer: any = null;
 
+  // Works list for this stage
+  worksList:      any[]    = [];
+  isLoadingList:  boolean  = false;
+  listError:      string   = '';
+
   // Submit
   showSubmitDialog: boolean = false;
   submitRemarks:    string  = '';
   isSubmitting:     boolean = false;
   submitSuccess:    string  = '';
   submitError:      string  = '';
+  submitDateTime:   string  = '';
 
   constructor(
     private auth:            AuthService,
@@ -90,7 +96,34 @@ export class EditEstimateComponent implements OnInit {
   get myStage()         { return STAGE_FLOW[this.userDesignation] || ''; }
   get nextStage()       { return NEXT_STAGE[this.myStage] || ''; }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { this.loadWorksList(); }
+
+  loadWorksList(): void {
+    this.isLoadingList = true;
+    this.listError     = '';
+    const stage = this.myStage;
+    const url   = `${this.apiBase}/works?stage=${encodeURIComponent(stage)}`;
+    this.http.get<any[]>(url).subscribe({
+      next: (works) => {
+        this.worksList     = works;
+        this.isLoadingList = false;
+      },
+      error: () => {
+        this.listError     = 'Could not load works list.';
+        this.isLoadingList = false;
+      }
+    });
+  }
+
+  selectWork(work: any): void {
+    this.workIdInput = work.work_id;
+    this.onCheckWorkId();
+    // Scroll to form
+    setTimeout(() => {
+      const el = document.querySelector('.edit-form-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 600);
+  }
 
   onCheckWorkId(): void {
     if (!this.workIdInput.trim()) { this.checkError = 'Please enter a Work ID.'; return; }
@@ -132,7 +165,7 @@ export class EditEstimateComponent implements OnInit {
                 quantity:    i.quantity,
                 unit:        i.unit,
                 rate:        i.rate,
-                amount:      i.amount,
+                amount:      Number(i.amount) || 0,
                 isMaterial:  i.is_material ? 'Yes' : 'No',
                 item_id:     i.item_id
               }));
@@ -238,6 +271,7 @@ export class EditEstimateComponent implements OnInit {
   }
 
   goBack(): void { this.router.navigate(['/home']); }
+  onLogout(): void { this.auth.logout(); this.router.navigate(['/login']); }
   createEmptyItem(sNo: number): any { return { sNo, description: '', numbers: 1, length: 0, breadth: 0, depth: 0, quantity: 1, rate: 0, unit: '', amount: 0, isMaterial: 'No' }; }
   trackByIndex(index: number, item: any): number { return item.sNo; }
 }

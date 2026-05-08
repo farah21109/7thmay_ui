@@ -393,6 +393,108 @@ app.get('/api/works', async (req, res) => {
   }
 });
 
+// ── POST /api/works/save ─────────────────────────────────────────
+// Save a NEW work (draft) without submitting
+app.post('/api/works/save', async (req, res) => {
+  const { nameOfWork, division, circle, ward, items, gstRate, gstAmount, grandTotal, submittedBy, designation } = req.body;
+  if (!nameOfWork || !items || items.length === 0) {
+    return res.status(400).json({ error: 'Work name and at least one item are required' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const workId = await generateWorkId(client);
+
+    // Delete any existing rows for this name (shouldn't exist but safety first)
+    await client.query('DELETE FROM work_order_items WHERE LOWER(name_of_work) = LOWER($1)', [nameOfWork]);
+
+    for (let i = 0; i < items.length; i++) {
+      const item    = items[i];
+      const itemSeq = String(i + 1).padStart(2, '0');
+      const itemId  = `${workId}_${itemSeq}`;
+      await client.query(
+        `INSERT INTO work_order_items
+           (work_id, item_id, name_of_work, division, circle, ward, sl_no,
+            description, numbers, length, breadth, depth,
+            quantity, unit, rate, amount, is_material,
+            current_stage, status, submitted_by)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        [
+          workId, itemId, nameOfWork, division || '', circle || '', ward || '',
+          i + 1, item.description,
+          item.numbers || 0, item.length || 0, item.breadth || 0, item.depth || 0,
+          item.quantity || 0, item.unit || '', item.rate || 0, item.amount || 0,
+          item.isMaterial === 'Yes',
+          designation || 'Manager',  // current_stage = user's own stage for draft
+          'draft',
+          submittedBy || ''
+        ]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, work_id: workId });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Save new work error:', err.message);
+    res.status(500).json({ error: 'Failed to save work', detail: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// ── POST /api/works/:workId/save ──────────────────────────────────
+// Update (re-save) an existing work draft without submitting
+app.post('/api/works/:workId/save', async (req, res) => {
+  const { workId } = req.params;
+  const { nameOfWork, division, circle, ward, items, gstRate, gstAmount, grandTotal, submittedBy, designation } = req.body;
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: 'At least one item is required' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Delete old items for this work
+    await client.query('DELETE FROM work_order_items WHERE work_id = $1', [workId]);
+
+    for (let i = 0; i < items.length; i++) {
+      const item    = items[i];
+      const itemSeq = String(i + 1).padStart(2, '0');
+      const itemId  = `${workId}_${itemSeq}`;
+      await client.query(
+        `INSERT INTO work_order_items
+           (work_id, item_id, name_of_work, division, circle, ward, sl_no,
+            description, numbers, length, breadth, depth,
+            quantity, unit, rate, amount, is_material,
+            current_stage, status, submitted_by)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        [
+          workId, itemId, nameOfWork || '', division || '', circle || '', ward || '',
+          i + 1, item.description,
+          item.numbers || 0, item.length || 0, item.breadth || 0, item.depth || 0,
+          item.quantity || 0, item.unit || '', item.rate || 0, item.amount || 0,
+          item.isMaterial === 'Yes',
+          designation || 'Manager',
+          'draft',
+          submittedBy || ''
+        ]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, work_id: workId });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Update work error:', err.message);
+    res.status(500).json({ error: 'Failed to update work', detail: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 // ── GET /api/works/:workId/items ─────────────────────────────────
 // Returns all items for a given work_id
 app.get('/api/works/:workId/items', async (req, res) => {

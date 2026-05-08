@@ -1,6 +1,7 @@
 <!-- Navbar -->
 <div class="top-navbar">
   <div class="navbar-left">
+    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
     <span class="navbar-logo">&#127963;</span>
     <span class="navbar-title">Work Order Management System</span>
   </div>
@@ -9,7 +10,7 @@
       <span class="navbar-user">&#128100; {{ userName }}</span>
       <span class="navbar-designation">{{ userDesignation }}</span>
     </div>
-    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
   </div>
 </div>
 

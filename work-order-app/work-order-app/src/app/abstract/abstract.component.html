@@ -1,8 +1,16 @@
 <!-- Top Navbar -->
 <div class="top-navbar">
   <div class="navbar-left">
+    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
     <span class="navbar-logo">&#127963;</span>
     <span class="navbar-title">Work Order Management System</span>
+  </div>
+  <div class="navbar-right">
+    <div class="navbar-user-info">
+      <span class="navbar-user">&#128100; {{ userName }}</span>
+      <span class="navbar-designation">{{ userDesignation }}</span>
+    </div>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
   </div>
 </div>
 
@@ -10,7 +18,6 @@
 
   <!-- Page Header -->
   <div class="abstract-header">
-    <button class="btn-back" (click)="goBack()">&#8592; Back</button>
     <div class="header-titles">
       <h1>Estimate Sheet — Abstract</h1>
       <h2>{{ nameOfWork }}</h2>
@@ -61,7 +68,7 @@
           <tr>
             <td class="center">2</td>
             <td>
-              <strong>Civil Works (Non-Material)</strong>
+              <strong>Civil Works</strong>
               <div class="sub-items" *ngIf="civilWorksItems.length > 0">
                 <div *ngFor="let item of civilWorksItems; let i = index" class="sub-item-row">
                   <span class="sub-num">{{ i + 1 }}.</span>
@@ -142,36 +149,8 @@
       </div>
     </div>
 
-    <!-- ═══ EDITED BY ═══ -->
-    <div class="edited-by-row">
-      <label class="edited-by-label">Edited By</label>
-      <select [(ngModel)]="editedBy" name="editedBy" class="edited-by-select">
-        <option value="">-- Select Person --</option>
-        <option value="Person 1">Person 1</option>
-        <option value="Person 2">Person 2</option>
-        <option value="Person 3">Person 3</option>
-        <option value="Person 4">Person 4</option>
-        <option value="Person 5">Person 5</option>
-        <option value="Person 6">Person 6</option>
-      </select>
-    </div>
-
-    <!-- ═══ SAVE BUTTON (hidden in view-only mode) ═══ -->
-    <div class="save-row" *ngIf="!viewOnly">
-      <button class="btn-save" (click)="onSave()" [disabled]="isSaving">
-        <span *ngIf="!isSaving">&#128190; Save to Database</span>
-        <span *ngIf="isSaving">Saving...</span>
-      </button>
-    </div>
-
-    <!-- Alerts -->
-    <div class="alert-success" *ngIf="saveSuccess && !viewOnly">
-      &#10003; Saved successfully to database!
-    </div>
-    <div class="alert-error" *ngIf="saveError">
-      &#10007; {{ saveError }}
+    <!-- Abstract is view-only — no buttons or editable fields -->
     </div>
 
 
   </div>
-</div>

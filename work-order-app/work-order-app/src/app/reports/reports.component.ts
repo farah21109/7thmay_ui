@@ -86,4 +86,5 @@ export class ReportsComponent {
   }
 
   goBack(): void { this.router.navigate(['/home']); }
+  onLogout(): void { this.auth.logout(); this.router.navigate(['/login']); }
 }

@@ -1,6 +1,7 @@
 <!-- Navbar -->
 <div class="top-navbar">
   <div class="navbar-left">
+    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
     <span class="navbar-logo">&#127963;</span>
     <span class="navbar-title">Work Order Management System</span>
   </div>
@@ -9,14 +10,52 @@
       <span class="navbar-user">&#128100; {{ userName }}</span>
       <span class="navbar-designation">{{ userDesignation }}</span>
     </div>
-    <button class="btn-back-home" (click)="goBack()">&#8592; Home</button>
+    <button class="btn-logout" (click)="onLogout()">Logout</button>
   </div>
 </div>
 
 <div class="page-container">
 
+  <!-- Works list for this stage -->
+  <div class="works-list-section">
+    <div class="section-title">Works Pending at Your Level ({{ userDesignation }})</div>
+    <div class="works-list-body">
+      <div *ngIf="isLoadingList" class="list-loading">Loading works...</div>
+      <div *ngIf="listError" class="list-error">{{ listError }}</div>
+      <div *ngIf="!isLoadingList && worksList.length === 0 && !listError" class="list-empty">
+        No works are currently pending at your level.
+      </div>
+      <table *ngIf="worksList.length > 0" class="works-list-table">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>Name of Work</th>
+            <th>Circle</th>
+            <th>Division</th>
+            <th>Ward</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of worksList" class="works-list-row">
+            <td class="td-workid">{{ w.work_id }}</td>
+            <td>{{ w.name_of_work }}</td>
+            <td>{{ w.circle  || '—' }}</td>
+            <td>{{ w.division|| '—' }}</td>
+            <td>{{ w.ward    || '—' }}</td>
+            <td><span class="status-badge">{{ w.status }}</span></td>
+            <td>
+              <button class="btn-open-work" (click)="selectWork(w)">Open &#8594;</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Work ID Lookup -->
-  <div class="lookup-section">
+  <div class="lookup-section edit-form-section">
     <div class="section-title">Edit Estimate — Enter Work ID / Name</div>
     <div class="lookup-body">
       <div class="lookup-row">

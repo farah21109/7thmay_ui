@@ -3,7 +3,7 @@
   font-family: Arial, sans-serif;
   font-size: 13px;
   background-color: #f5f5f0;
-  min-height: 100vh;
+  min-height: calc(100vh - 44px);
   padding: 20px;
 }
 
@@ -394,3 +394,41 @@ input[type="number"] { -moz-appearance: textfield; }
   font-weight: bold;
   margin-bottom: 12px;
 }
+
+/* ── Navbar ── */
+.top-navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background-color: #8b8040; color: white;
+  padding: 10px 20px;
+  font-family: Arial, sans-serif;
+}
+.navbar-left  { display: flex; align-items: center; gap: 10px; }
+.navbar-logo  { font-size: 20px; }
+.navbar-title { font-size: 15px; font-weight: bold; letter-spacing: 0.3px; }
+.navbar-right { display: flex; align-items: center; gap: 14px; }
+.navbar-user-info { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.navbar-user        { font-size: 13px; }
+.navbar-designation { font-size: 11px; opacity: 0.8; }
+.btn-back-home {
+  background-color: rgba(255,255,255,0.2); color: white;
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 3px;
+  padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
+  margin-right: 6px;
+}
+.btn-back-home:hover { background-color: rgba(255,255,255,0.35); }
+.btn-logout {
+  background-color: rgba(255,255,255,0.2); color: white;
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 3px;
+  padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.btn-logout:hover { background-color: rgba(255,255,255,0.35); }
+
+/* ── Submit button in abstract ── */
+.btn-submit-abstract {
+  background-color: #1565c0; color: white;
+  border: none; border-radius: 4px;
+  padding: 9px 22px; font-size: 13px; font-weight: bold;
+  cursor: pointer; margin-left: 10px; transition: background 0.2s;
+}
+.btn-submit-abstract:hover { background-color: #0d47a1; }
+.btn-submit-abstract:disabled { background-color: #90caf9; cursor: not-allowed; }

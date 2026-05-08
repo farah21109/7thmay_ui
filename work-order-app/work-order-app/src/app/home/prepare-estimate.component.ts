@@ -88,7 +88,74 @@ export class PrepareEstimateComponent implements OnInit {
   // Existing work, editable at this stage
   get isEditable(): boolean { return this.workExists && this.accessLevel === 'edit'; }
 
-  ngOnInit(): void {}
+  private DRAFT_KEY = 'prepare_estimate_draft';
+
+  ngOnInit(): void {
+    this.restoreDraft();
+  }
+
+  // ── Auto-save draft to localStorage ──────────────────────────
+  saveDraft(): void {
+    if (!this.nameOfWork.trim() && this.savedItems.length === 0) return;
+    const draft = {
+      nameOfWork:       this.nameOfWork,
+      selectedDivision: this.selectedDivision,
+      selectedCircle:   this.selectedCircle,
+      selectedWard:     this.selectedWard,
+      selectedGstRate:  this.selectedGstRate,
+      savedItems:       this.savedItems,
+      existingWorkId:   this.existingWorkId,
+      workChecked:      this.workChecked,
+      workExists:       this.workExists,
+      accessLevel:      this.accessLevel,
+      currentStage:     this.currentStage,
+      nextStage:        this.nextStage,
+      lastSubmittedAt:  this.lastSubmittedAt,
+      lastSubmittedBy:  this.lastSubmittedBy,
+      lastFromStage:    this.lastFromStage,
+      lastToStage:      this.lastToStage,
+      savedAt:          new Date().toISOString()
+    };
+    try { localStorage.setItem(this.DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
+  }
+
+  restoreDraft(): void {
+    try {
+      const raw = localStorage.getItem(this.DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      this.nameOfWork       = draft.nameOfWork       || '';
+      this.selectedDivision = draft.selectedDivision || '';
+      this.selectedCircle   = draft.selectedCircle   || '';
+      this.selectedWard     = draft.selectedWard     || '';
+      this.selectedGstRate  = draft.selectedGstRate  || 0;
+      this.savedItems       = draft.savedItems       || [];
+      this.existingWorkId   = draft.existingWorkId   || '';
+      this.workChecked      = draft.workChecked      || false;
+      this.workExists       = draft.workExists       || false;
+      this.accessLevel      = draft.accessLevel      || '';
+      this.currentStage     = draft.currentStage     || '';
+      this.nextStage        = draft.nextStage        || '';
+      this.lastSubmittedAt  = draft.lastSubmittedAt  || '';
+      this.lastSubmittedBy  = draft.lastSubmittedBy  || '';
+      this.lastFromStage    = draft.lastFromStage    || '';
+      this.lastToStage      = draft.lastToStage      || '';
+      this.workIdInput      = this.nameOfWork;
+      this.currentItem      = this.createEmptyItem(this.savedItems.length + 1);
+      this.refreshTotals();
+      if (draft.savedAt) {
+        const d = new Date(draft.savedAt);
+        this.draftRestoredMsg = 'Draft restored from ' + d.toLocaleDateString('en-IN') + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      }
+    } catch (e) {}
+  }
+
+  clearDraft(): void {
+    try { localStorage.removeItem(this.DRAFT_KEY); } catch (e) {}
+    this.draftRestoredMsg = '';
+  }
+
+  draftRestoredMsg: string = '';
 
   // ── Check Work ID ─────────────────────────────────────────────
   onCheckWorkId(): void {
@@ -141,7 +208,7 @@ export class PrepareEstimateComponent implements OnInit {
                 quantity:    i.quantity,
                 unit:        i.unit,
                 rate:        i.rate,
-                amount:      i.amount,
+                amount:      Number(i.amount) || 0,
                 isMaterial:  i.is_material ? 'Yes' : 'No',
                 item_id:     i.item_id
               }));
@@ -201,12 +268,12 @@ export class PrepareEstimateComponent implements OnInit {
   onRateChange():     void { this.currentItem.amount = parseFloat((this.currentItem.quantity * this.currentItem.rate).toFixed(2)); }
   onQuantityChange(): void { this.currentItem.amount = parseFloat((this.currentItem.quantity * this.currentItem.rate).toFixed(2)); }
 
-  onAdd(): void    { this.savedItems.push({ ...this.currentItem }); this.currentItem = this.createEmptyItem(this.savedItems.length + 1); this.refreshTotals(); }
+  onAdd(): void    { this.savedItems.push({ ...this.currentItem }); this.currentItem = this.createEmptyItem(this.savedItems.length + 1); this.refreshTotals(); this.saveDraft(); }
   onCancel(): void { this.currentItem = this.createEmptyItem(this.savedItems.length + 1); }
-  onDelete(i: number): void { this.savedItems.splice(i, 1); this.savedItems.forEach((item, idx) => item.sNo = idx + 1); this.currentItem.sNo = this.savedItems.length + 1; this.refreshTotals(); }
-  onEdit(i: number): void   { this.currentItem = { ...this.savedItems[i] }; this.savedItems.splice(i, 1); this.savedItems.forEach((item, idx) => item.sNo = idx + 1); this.currentItem.sNo = this.savedItems.length + 1; this.refreshTotals(); }
+  onDelete(i: number): void { this.savedItems.splice(i, 1); this.savedItems.forEach((item, idx) => item.sNo = idx + 1); this.currentItem.sNo = this.savedItems.length + 1; this.refreshTotals(); this.saveDraft(); }
+  onEdit(i: number): void   { this.currentItem = { ...this.savedItems[i] }; this.savedItems.splice(i, 1); this.savedItems.forEach((item, idx) => item.sNo = idx + 1); this.currentItem.sNo = this.savedItems.length + 1; this.refreshTotals(); this.saveDraft(); }
 
-  onGstRateChange():     void { this.totals.gst = parseFloat((this.totals.totalAmount * this.selectedGstRate / 100).toFixed(2)); this.totals.grandTotal = parseFloat((this.totals.totalAmount + this.totals.gst).toFixed(2)); }
+  onGstRateChange():     void { this.totals.gst = parseFloat((this.totals.totalAmount * this.selectedGstRate / 100).toFixed(2)); this.totals.grandTotal = parseFloat((this.totals.totalAmount + this.totals.gst).toFixed(2)); this.saveDraft(); }
   onTotalAmountChange(): void { this.onGstRateChange(); }
   refreshTotals(): void { this.totals.totalAmount = parseFloat(this.savedItems.reduce((s, i) => s + i.amount, 0).toFixed(2)); this.onGstRateChange(); }
   getRowTotal(): number { return this.savedItems.reduce((s, i) => s + i.amount, 0); }
@@ -216,32 +283,109 @@ export class PrepareEstimateComponent implements OnInit {
   closeSubmitDialog(): void { this.showSubmitDialog = false; }
 
   onSubmit(): void {
+    if (!this.nameOfWork.trim()) { this.submitError = 'Please enter a work name first.'; return; }
+    if (this.savedItems.length === 0) { this.submitError = 'Please add at least one item first.'; return; }
     this.isSubmitting = true;
     this.submitError  = '';
 
-    this.http.post<any>(`${this.apiBase}/works/${this.existingWorkId}/submit`, {
-      submittedBy:  this.userName,
-      designation:  this.userDesignation,
-      remarks:      this.submitRemarks
-    }).subscribe({
-      next: (res) => {
-        this.isSubmitting  = false;
-        this.submitSuccess = `Submitted to ${res.toStage} successfully!`;
-        this.accessLevel   = 'view'; // now view-only for this user
-        // Record submit date/time
-        const now = new Date();
-        this.submitDateTime   = now.toLocaleDateString('en-IN') + ' at ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-        this.lastSubmittedAt  = this.submitDateTime;
-        this.lastSubmittedBy  = this.userName;
-        this.lastFromStage    = this.userDesignation;
-        this.lastToStage      = res.toStage;
-        setTimeout(() => this.closeSubmitDialog(), 2000);
-      },
-      error: (err) => { this.isSubmitting = false; this.submitError = err?.error?.detail || 'Submit failed.'; }
-    });
+    // If new work (no existingWorkId), save it first then submit
+    const doSubmit = (workId: string) => {
+      this.http.post<any>(`${this.apiBase}/works/${workId}/submit`, {
+        submittedBy:  this.userName,
+        designation:  this.userDesignation,
+        remarks:      this.submitRemarks
+      }).subscribe({
+        next: (res) => {
+          this.isSubmitting  = false;
+          this.submitSuccess = `Submitted to ${res.toStage} successfully!`;
+          this.accessLevel   = 'view';
+          this.workExists    = true;
+          this.existingWorkId = workId;
+          // Record submit date/time in HH:MM
+          const now = new Date();
+          const hhmm = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          const date  = now.toLocaleDateString('en-IN');
+          this.submitDateTime  = date + ' at ' + hhmm;
+          this.lastSubmittedAt = this.submitDateTime;
+          this.lastSubmittedBy = this.userName;
+          this.lastFromStage   = this.userDesignation;
+          this.lastToStage     = res.toStage;
+          this.clearDraft();
+          setTimeout(() => this.closeSubmitDialog(), 2000);
+        },
+        error: (err) => { this.isSubmitting = false; this.submitError = err?.error?.detail || 'Submit failed.'; }
+      });
+    };
+
+    if (this.existingWorkId) {
+      // Already saved — submit directly
+      doSubmit(this.existingWorkId);
+    } else {
+      // New work — save first to get a work_id, then submit
+      const payload = {
+        nameOfWork:  this.nameOfWork,
+        division:    this.selectedDivision,
+        circle:      this.selectedCircle,
+        ward:        this.selectedWard,
+        gstRate:     this.selectedGstRate,
+        gstAmount:   this.totals.gst,
+        grandTotal:  this.totals.grandTotal,
+        submittedBy: this.userName,
+        designation: this.userDesignation,
+        items:       this.savedItems
+      };
+      this.http.post<any>(`${this.apiBase}/works/save`, payload).subscribe({
+        next: (res) => { doSubmit(res.work_id); },
+        error: (err) => { this.isSubmitting = false; this.submitError = 'Could not save work before submitting.'; }
+      });
+    }
   }
 
   // ── Generate Sheet ────────────────────────────────────────────
+  // ── Save work without submitting ─────────────────────────────
+  isSaving:     boolean = false;
+  saveSuccess:  string  = '';
+  saveError:    string  = '';
+
+  onSaveWork(): void {
+    if (!this.nameOfWork.trim()) { this.saveError = 'Please enter a work name.'; return; }
+    this.isSaving   = true;
+    this.saveError  = '';
+    this.saveSuccess= '';
+
+    const payload = {
+      nameOfWork:   this.nameOfWork,
+      division:     this.selectedDivision,
+      circle:       this.selectedCircle,
+      ward:         this.selectedWard,
+      gstRate:      this.selectedGstRate,
+      gstAmount:    this.totals.gst,
+      grandTotal:   this.totals.grandTotal,
+      submittedBy:  this.userName,
+      designation:  this.userDesignation,
+      items:        this.savedItems,
+      saveDraft:    true   // flag: save but do NOT submit
+    };
+
+    const url = this.existingWorkId
+      ? `${this.apiBase}/works/${this.existingWorkId}/save`
+      : `${this.apiBase}/works/save`;
+
+    this.http.post<any>(url, payload).subscribe({
+      next: (res) => {
+        this.isSaving       = false;
+        this.saveSuccess    = 'Work saved successfully!';
+        if (res.work_id) this.existingWorkId = res.work_id;
+        this.clearDraft();  // safe to clear now — saved in DB
+        setTimeout(() => { this.saveSuccess = ''; }, 3000);
+      },
+      error: (err) => {
+        this.isSaving  = false;
+        this.saveError = err?.error?.detail || 'Save failed. Please try again.';
+      }
+    });
+  }
+
   onGenerateSheet(): void {
     if (this.savedItems.length === 0) { alert('Please add at least one item.'); return; }
     this.stateService.setState({
@@ -261,6 +405,7 @@ export class PrepareEstimateComponent implements OnInit {
   }
 
   goBack(): void { this.router.navigate(['/home']); }
+  onLogout(): void { this.auth.logout(); this.router.navigate(['/login']); }
 
   createEmptyItem(sNo: number): any {
     return { sNo, description: '', numbers: 1, length: 0, breadth: 0, depth: 0, quantity: 1, rate: 0, unit: '', amount: 0, isMaterial: 'No' };
